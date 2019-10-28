@@ -1,0 +1,4 @@
+{ status: 400,
+  statusText: 'Bad Request',
+  body:
+   'Failed to parse the request body: No case matched:\n  At /kind, unexpected string instead of endorsement\n  At /kind, unexpected string instead of seed_nonce_revelation\n  At /kind, unexpected string instead of double_endorsement_evidence\n  At /kind, unexpected string instead of double_baking_evidence\n  At /kind, unexpected string instead of activate_account\n  At /kind, unexpected string instead of proposals\n  At /kind, unexpected string instead of ballot\n  At /kind, unexpected string instead of reveal\n  At /parameters, missing object field entrypoint\n  At /kind, unexpected string instead of origination\n  At /kind, unexpected string instead of delegation' }

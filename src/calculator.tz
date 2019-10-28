@@ -1,0 +1,291 @@
+parameter (or (or (or (or (or (pair %add (nat %x) (nat %y)) (nat %factorial)) (nat %log2)) (pair %multiply (nat %x) (nat %y))) (nat %square)) (nat %squareRoot));
+
+storage nat;
+
+code
+  {
+    DUP;        # pair(params, storage).pair(params, storage)
+    CDR;        # storage.pair(params, storage)
+    SWAP;       # pair(params, storage).storage
+    CAR;        # params.storage
+    IF_LEFT
+      {
+        IF_LEFT
+          {
+            IF_LEFT
+              {
+                IF_LEFT
+                  {
+                    IF_LEFT
+                      {
+                        # Entry point: add # pair %add (nat %x) (nat %y).storage
+                        PAIR;       # pair(params, storage)
+                        # self.data.value = params.x + params.y # pair(params, storage)
+                        DUP;        # pair(params, storage).pair(params, storage)
+                        DUP;        # pair(params, storage).pair(params, storage).pair(params, storage)
+                        CADR;       # nat.pair(params, storage).pair(params, storage)
+                        SWAP;       # pair(params, storage).nat.pair(params, storage)
+                        CAAR;       # nat.nat.pair(params, storage)
+                        ADD;        # nat.pair(params, storage)
+                        SWAP;       # pair(params, storage).nat
+                        DROP;       # nat
+                      }
+                      {
+                        # Entry point: factorial # (nat %factorial).storage
+                        PAIR;       # pair(params, storage)
+                        # self.data.value = 1 # pair(params, storage)
+                        CAR;        # nat
+                        PUSH nat 1; # nat.nat
+                        SWAP;       # nat.nat
+                        PAIR;       # pair nat nat
+                        DUP;        # pair nat nat.pair nat nat
+                        CAR;        # nat.pair nat nat
+                        PUSH nat 1; # nat.nat.pair nat nat
+                        ADD;        # nat.pair nat nat
+                        # for y in range(1, params + 1, 1): ... (nat) # nat.pair nat nat
+                        PUSH nat 1; # nat.nat.pair nat nat
+                        PUSH nat 1; # nat.nat.nat.pair nat nat
+                        PUSH nat 0; # nat.nat.nat.nat.pair nat nat
+                        COMPARE;    # int.nat.nat.pair nat nat
+                        EQ;         # bool.nat.nat.pair nat nat
+                        IF
+                          {
+                            DUP;        # nat.nat.nat.pair nat nat
+                            DUUUP;      # nat.nat.nat.nat.pair nat nat
+                            COMPARE;    # int.nat.nat.pair nat nat
+                            LT;         # bool.nat.nat.pair nat nat
+                            LOOP
+                              {
+                                # self.data.value *= y # nat.nat.pair nat nat
+                                DUP;        # nat.nat.nat.pair nat nat
+                                DUUUUP;     # pair nat nat.nat.nat.nat.pair nat nat
+                                CDR;        # nat.nat.nat.nat.pair nat nat
+                                MUL;        # nat.nat.nat.pair nat nat
+                                SWAP;       # nat.nat.nat.pair nat nat
+                                DIP
+                                  {
+                                    SWAP;       # nat.nat.pair nat nat
+                                    DIP
+                                      {
+                                        SWAP;       # pair nat nat.nat
+                                        CAR;        # nat.nat
+                                        PAIR;       # pair nat nat
+                                      }; # nat.pair nat nat
+                                  }; # nat.nat.pair nat nat
+                                # loop step # nat.nat.pair nat nat
+                                PUSH nat 1; # nat.nat.nat.pair nat nat
+                                ADD;        # nat.nat.pair nat nat
+                                DUP;        # nat.nat.nat.pair nat nat
+                                DUUUP;      # nat.nat.nat.nat.pair nat nat
+                                COMPARE;    # int.nat.nat.pair nat nat
+                                LT;         # bool.nat.nat.pair nat nat
+                              }; # nat.nat.pair nat nat
+                          }
+                          {
+                            PUSH string "step size is 0"; # string.nat.nat.pair nat nat
+                            FAILWITH;   # FAILED
+                          }; # nat.nat.pair nat nat
+                        DROP;       # nat.pair nat nat
+                        DROP;       # pair nat nat
+                        CDR;        # nat
+                      }; # nat
+                  }
+                  {
+                    # Entry point: log2 # (nat %log2).storage
+                    PAIR;       # pair(params, storage)
+                    # self.data.value = 0 # pair(params, storage)
+                    CAR;        # nat
+                    PUSH nat 0; # nat.nat
+                    SWAP;       # nat.nat
+                    PAIR;       # pair nat nat
+                    # y = sp.newLocal("y", params, nat) # pair nat nat
+                    DUP;        # pair nat nat.pair nat nat
+                    CAR;        # nat.pair nat nat
+                    # while y > 0 : ... # nat.pair nat nat
+                    DUP;        # nat.nat.pair nat nat
+                    PUSH nat 0; # nat.nat.nat.pair nat nat
+                    SWAP;       # nat.nat.nat.pair nat nat
+                    COMPARE;    # int.nat.pair nat nat
+                    GT;         # bool.nat.pair nat nat
+                    LOOP
+                      {
+                        # self.data.value += 1 # nat.pair nat nat
+                        DUUP;       # pair nat nat.nat.pair nat nat
+                        CDR;        # nat.nat.pair nat nat
+                        PUSH nat 1; # nat.nat.nat.pair nat nat
+                        ADD;        # nat.nat.pair nat nat
+                        SWAP;       # nat.nat.pair nat nat
+                        DIP
+                          {
+                            SWAP;       # pair nat nat.nat
+                            CAR;        # nat.nat
+                            PAIR;       # pair nat nat
+                          }; # nat.pair nat nat
+                        # y //= 2 # nat.pair nat nat
+                        DUP;        # nat.nat.pair nat nat
+                        PUSH nat 2; # nat.nat.nat.pair nat nat
+                        SWAP;       # nat.nat.nat.pair nat nat
+                        EDIV;       # option (pair nat nat).nat.pair nat nat
+                        IF_SOME
+                          {
+                            CAR;        # nat.nat.pair nat nat
+                          }
+                          {
+                            PUSH string "division by zero"; # string.nat.pair nat nat
+                            FAILWITH;   # FAILED
+                          }; # nat.nat.pair nat nat
+                        SWAP;       # nat.nat.pair nat nat
+                        DROP;       # nat.pair nat nat
+                        # check for next loop: y > 0 # nat.pair nat nat
+                        DUP;        # nat.nat.pair nat nat
+                        PUSH nat 0; # nat.nat.nat.pair nat nat
+                        SWAP;       # nat.nat.nat.pair nat nat
+                        COMPARE;    # int.nat.pair nat nat
+                        GT;         # bool.nat.pair nat nat
+                      }; # nat.pair nat nat
+                    DROP;       # pair nat nat
+                    CDR;        # nat
+                  }; # nat
+              }
+              {
+                # Entry point: multiply # pair %multiply (nat %x) (nat %y).storage
+                PAIR;       # pair(params, storage)
+                # self.data.value = params.x * params.y # pair(params, storage)
+                DUP;        # pair(params, storage).pair(params, storage)
+                DUP;        # pair(params, storage).pair(params, storage).pair(params, storage)
+                CADR;       # nat.pair(params, storage).pair(params, storage)
+                SWAP;       # pair(params, storage).nat.pair(params, storage)
+                CAAR;       # nat.nat.pair(params, storage)
+                MUL;        # nat.pair(params, storage)
+                SWAP;       # pair(params, storage).nat
+                DROP;       # nat
+              }; # nat
+          }
+          {
+            # Entry point: square # (nat %square).storage
+            PAIR;       # pair(params, storage)
+            # self.data.value = params * params # pair(params, storage)
+            DUP;        # pair(params, storage).pair(params, storage)
+            CAR;        # nat.pair(params, storage)
+            DUP;        # nat.nat.pair(params, storage)
+            MUL;        # nat.pair(params, storage)
+            SWAP;       # pair(params, storage).nat
+            DROP;       # nat
+          }; # nat
+      }
+      {
+        # Entry point: squareRoot # (nat %squareRoot).storage
+        PAIR;       # pair(params, storage)
+        # sp.verify(params >= 0) # pair(params, storage)
+        DUP;        # pair(params, storage).pair(params, storage)
+        CAR;        # nat.pair(params, storage)
+        PUSH nat 0; # nat.nat.pair(params, storage)
+        SWAP;       # nat.nat.pair(params, storage)
+        COMPARE;    # int.pair(params, storage)
+        GE;         # bool.pair(params, storage)
+        IF
+          {}
+          {
+            PUSH string "WrongCondition: params >= 0"; # string.pair(params, storage)
+            FAILWITH;   # FAILED
+          }; # pair(params, storage)
+        # y = sp.newLocal("y", params, nat) # pair(params, storage)
+        DUP;        # pair(params, storage).pair(params, storage)
+        CAR;        # nat.pair(params, storage)
+        # while (y * y) > params : ... # nat.pair(params, storage)
+        DUUP;       # pair(params, storage).nat.pair(params, storage)
+        DIP
+          {
+            DUP;        # nat.nat.pair(params, storage)
+          }; # pair(params, storage).nat.nat.pair(params, storage)
+        CAR;        # nat.nat.nat.pair(params, storage)
+        SWAP;       # nat.nat.nat.pair(params, storage)
+        DUP;        # nat.nat.nat.nat.pair(params, storage)
+        MUL;        # nat.nat.nat.pair(params, storage)
+        COMPARE;    # int.nat.pair(params, storage)
+        GT;         # bool.nat.pair(params, storage)
+        LOOP
+          {
+            # y.set(((params // y) + y) // 2) # nat.pair(params, storage)
+            DUP;        # nat.nat.pair(params, storage)
+            PUSH nat 2; # nat.nat.nat.pair(params, storage)
+            SWAP;       # nat.nat.nat.pair(params, storage)
+            DUP;        # nat.nat.nat.nat.pair(params, storage)
+            DUUUUUP;    # pair(params, storage).nat.nat.nat.nat.pair(params, storage)
+            CAR;        # nat.nat.nat.nat.nat.pair(params, storage)
+            EDIV;       # option (pair nat nat).nat.nat.nat.pair(params, storage)
+            IF_SOME
+              {
+                CAR;        # nat.nat.nat.nat.pair(params, storage)
+              }
+              {
+                PUSH string "division by zero"; # string.nat.nat.nat.pair(params, storage)
+                FAILWITH;   # FAILED
+              }; # nat.nat.nat.nat.pair(params, storage)
+            ADD;        # nat.nat.nat.pair(params, storage)
+            EDIV;       # option (pair nat nat).nat.pair(params, storage)
+            IF_SOME
+              {
+                CAR;        # nat.nat.pair(params, storage)
+              }
+              {
+                PUSH string "division by zero"; # string.nat.pair(params, storage)
+                FAILWITH;   # FAILED
+              }; # nat.nat.pair(params, storage)
+            SWAP;       # nat.nat.pair(params, storage)
+            DROP;       # nat.pair(params, storage)
+            # check for next loop: (y * y) > params # nat.pair(params, storage)
+            DUUP;       # pair(params, storage).nat.pair(params, storage)
+            DIP
+              {
+                DUP;        # nat.nat.pair(params, storage)
+              }; # pair(params, storage).nat.nat.pair(params, storage)
+            CAR;        # nat.nat.nat.pair(params, storage)
+            SWAP;       # nat.nat.nat.pair(params, storage)
+            DUP;        # nat.nat.nat.nat.pair(params, storage)
+            MUL;        # nat.nat.nat.pair(params, storage)
+            COMPARE;    # int.nat.pair(params, storage)
+            GT;         # bool.nat.pair(params, storage)
+          }; # nat.pair(params, storage)
+        # sp.verify(((y * y) <= params) & (params < ((y + 1) * (y + 1)))) # nat.pair(params, storage)
+        DUUP;       # pair(params, storage).nat.pair(params, storage)
+        DIP
+          {
+            DUP;        # nat.nat.pair(params, storage)
+          }; # pair(params, storage).nat.nat.pair(params, storage)
+        CAR;        # nat.nat.nat.pair(params, storage)
+        SWAP;       # nat.nat.nat.pair(params, storage)
+        DUP;        # nat.nat.nat.nat.pair(params, storage)
+        MUL;        # nat.nat.nat.pair(params, storage)
+        COMPARE;    # int.nat.pair(params, storage)
+        LE;         # bool.nat.pair(params, storage)
+        IF
+          {
+            DUP;        # nat.nat.pair(params, storage)
+            PUSH nat 1; # nat.nat.nat.pair(params, storage)
+            ADD;        # nat.nat.pair(params, storage)
+            DUUP;       # nat.nat.nat.pair(params, storage)
+            PUSH nat 1; # nat.nat.nat.nat.pair(params, storage)
+            ADD;        # nat.nat.nat.pair(params, storage)
+            MUL;        # nat.nat.pair(params, storage)
+            DUUUP;      # pair(params, storage).nat.nat.pair(params, storage)
+            CAR;        # nat.nat.nat.pair(params, storage)
+            COMPARE;    # int.nat.pair(params, storage)
+            LT;         # bool.nat.pair(params, storage)
+          }
+          {
+            PUSH bool False; # bool.nat.pair(params, storage)
+          }; # bool.nat.pair nat nat
+        IF
+          {}
+          {
+            PUSH string "WrongCondition: ((y * y) <= params) & (params < ((y + 1) * (y + 1)))"; # string.nat.pair nat nat
+            FAILWITH;   # FAILED
+          }; # nat.pair nat nat
+        # self.data.value = y # nat.pair nat nat
+        SWAP;       # pair nat nat.nat
+        DROP;       # nat
+      }; # nat
+    NIL operation; # list (operation).nat
+    PAIR;       # pair (list (operation)) nat
+  } # pair (list (operation)) nat;
